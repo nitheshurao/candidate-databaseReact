@@ -22,34 +22,16 @@ const CandidateForm = (props) => {
             setLocation(res.data.location)
             setCodingResult(res.data.codingResult)
         }
-        fetchData();
+        if (props.id) {
+
+            fetchData();
+        }
     }, [id])
     const handleSubmit = async (e) => {
         e.preventDefault();
-        try {
-            const response = await addCandidate({
-                name,
-                skills,
-                experience,
-                location
-            });
-            console.log("resss", response);
-            setName('');
-            setSkills('');
-            setExperience('');
-            setLocation('');
-            setCodingResult('')
-            props.handleClose()
-        } catch (error) {
-            console.error('Error adding candidate:', error);
-        }
-    };
-    const handleUpdate = async (e) => {
-        e.preventDefault();
-        console.log("getCandidateByidgetCandidateupdate");
-        try {
+        if (props?.id) {
             const response = await getCandidateupdate({
-                _id: props.id,
+                _id: props?.id,
                 name,
                 skills,
                 experience,
@@ -62,14 +44,51 @@ const CandidateForm = (props) => {
             setLocation('');
             setCodingResult('')
             props.setDataChanges('1')
-        } catch (error) {
-            console.error('Error adding candidate:', error);
+        } else {
+            try {
+                const response = await addCandidate({
+                    name,
+                    skills,
+                    experience,
+                    location
+                });
+                console.log("resss", response);
+                setName('');
+                setSkills('');
+                setExperience('');
+                setLocation('');
+                setCodingResult('')
+                props.handleClose()
+            } catch (error) {
+                console.error('Error adding candidate:', error);
+            }
         }
     };
+    // const handleUpdate = async (e) => {
+    //     console.log("getCandidateByidgetCandidateupdate");
+    //     try {
+    //         const response = await getCandidateupdate({
+    //             _id: props.id,
+    //             name,
+    //             skills,
+    //             experience,
+    //             location
+    //         });
+    //         console.log("resss", response);
+    //         setName('');
+    //         setSkills('');
+    //         setExperience('');
+    //         setLocation('');
+    //         setCodingResult('')
+    //         props.setDataChanges('1')
+    //     } catch (error) {
+    //         console.error('Error adding candidate:', error);
+    //     }
+    // };
 
 
     return (
-        <form onSubmit={props.id ? handleUpdate : handleSubmit}>
+        <form onSubmit={handleSubmit}>
             <Grid container spacing={2}>
                 <Grid item xs={12} sm={6}>
                     <TextField label="Name" value={name} onChange={(e) => setName(e.target.value)} fullWidth />

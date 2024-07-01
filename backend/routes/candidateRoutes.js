@@ -64,19 +64,20 @@ router.post('/candidates', async (req, res) => {
 });
 
 // Update a candidate
-router.patch('/candidatesupdate/:id', getCandidate, async (req, res) => {
-
+router.patch('/candidatesupdate/:id', async (req, res) => {
+    console.log("candidatesupdate", res);
+    let candidate = await Candidate.findById(req.params.id);
     if (req.body.name != null) {
-        res.candidate.name = req.body.name;
+        candidate.name = req.body.name;
     }
     if (req.body.skills != null) {
-        res.candidate.skills = req.body.skills;
+        candidate.skills = req.body.skills;
     }
-    if (req.body.yearsOfExperience != null) {
-        res.candidate.experience = req.body.experience;
-    }
+    // if (req.body.experience != null) {
+    //     candidate.experience = req.body.experience;
+    // }
     if (req.body.location != null) {
-        res.candidate.location = req.body.location;
+        candidate.location = req.body.location;
     }
     try {
         const updatedCandidate = await res.candidate.save();
@@ -104,7 +105,7 @@ router.delete('/candidatesdelete/:id', async (req, res) => {
 
 // Middleware function to get candidate by ID
 async function getCandidate(req, res, next) {
-    console.log("-----------------------");
+    console.log("-----------------------11", req.params.id);
     let candidate;
     try {
         candidate = await Candidate.findById(req.params.id);
