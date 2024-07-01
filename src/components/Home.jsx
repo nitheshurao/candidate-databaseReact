@@ -9,6 +9,7 @@ import CandidateForm from './CandidateForm';
 import CandidateList from './CandidateList';
 import { getAllCandidates } from '../services/api';
 import { useNavigate } from 'react-router-dom';
+import CandidateSearch from './CandidateSearch';
 
 export default function Home() {
   const [open, setOpen] = React.useState(false);
@@ -16,6 +17,8 @@ export default function Home() {
   const [candidates, setCandidates] = React.useState([]);
   const [currentPage, setCurrentPage] = React.useState(0);
   const [limit,setLimit] = React.useState(10);
+  const [datachanged,setDataChanges] =React.useState(0);
+  
   const handleClickOpen = () => {
     setOpen(true);
   };
@@ -29,7 +32,9 @@ export default function Home() {
   const handleClose = () => {
     setOpen(false);
   };
-
+  const handleSearchResults = (results) => {
+    setCandidates(results);
+  };
   React.useEffect(() => {
     const fetchData = async () => {
       const data = await getAllCandidates({currentPage:currentPage,limit:limit});
@@ -39,13 +44,14 @@ export default function Home() {
       setTotalCount(data.data.totalCount)
     };
     fetchData();
-  }, [open,currentPage, limit]);
+  }, [open,currentPage, limit,datachanged]);
   return (
     <React.Fragment>
          <Button onClick={() => { handleClick() }}>Chart</Button>
       <Button variant="outlined" onClick={handleClickOpen}>
       Create 
       </Button>
+      <CandidateSearch onSearchResults={handleSearchResults} />
       <Dialog
         open={open}
         onClose={handleClose}
@@ -66,7 +72,7 @@ export default function Home() {
         </DialogActions>
       </Dialog>
 
-      <CandidateList candidates={candidates} setLimit={setLimit} totolCount ={totalCount} limit={limit} currentPage={currentPage} setCurrentPage={setCurrentPage}/>
+      <CandidateList candidates={candidates} setLimit={setLimit} totolCount ={totalCount} limit={limit} currentPage={currentPage} setCurrentPage={setCurrentPage} setDataChanges={setDataChanges}/>
     </React.Fragment>
   );
 }

@@ -6,12 +6,27 @@ const Candidate = require('../models/candidate');
 router.get('/candidates', async (req, res) => {
     const page = parseInt(req.query.page) || 1; // Current page (default: 1)
     const limit = parseInt(req.query.limit) || 10;
+    const searchQuery = req.query.search;
+    let query = {};
+    console.log("candidatessearchQuery", searchQuery);
+    if (searchQuery) {
+        // const regex = new RegExp(searchQuery, 'i');
+        // console.log("______", regex);
+        query = {
+            $or: [
+                { name: String(searchQuery) },
+                // { skills: String(searchQuery) },
+                // { location: String(searchQuery) },
+                // { experience: searchQuery }
+            ],
+        };
+    }
     try {
         const skip = (page - 1) * limit;
         const totalCount = await Candidate.countDocuments();
         // Fetch candidates with pagination
         console.log('Total number of candidates:', totalCount);
-        const candidates = await Candidate.find()
+        const candidates = await Candidate.find(query)
             .skip(skip)
             .limit(limit);
         res.json({
@@ -24,7 +39,7 @@ router.get('/candidates', async (req, res) => {
 });
 
 // Get one candidate
-router.get('/candidates/:id', getCandidate, (req, res) => {
+router.get('/candidateById/:id', getCandidate, (req, res) => {
     res.json(res.candidate);
 });
 
@@ -49,26 +64,20 @@ router.post('/candidates', async (req, res) => {
 });
 
 // Update a candidate
-router.patch('/candidates/:id', getCandidate, async (req, res) => {
+router.patch('/candidatesupdate/:id', getCandidate, async (req, res) => {
+
     if (req.body.name != null) {
         res.candidate.name = req.body.name;
     }
     if (req.body.skills != null) {
         res.candidate.skills = req.body.skills;
     }
-    if (req.body.experience != null) {
+    if (req.body.yearsOfExperience != null) {
         res.candidate.experience = req.body.experience;
     }
     if (req.body.location != null) {
         res.candidate.location = req.body.location;
     }
-    if (req.body.videoInterviewResult != null) {
-        res.candidate.videoInterviewResult = req.body.videoInterviewResult;
-    }
-    if (req.body.codingResult != null) {
-        res.candidate.codingResult = req.body.codingResult;
-    }
-
     try {
         const updatedCandidate = await res.candidate.save();
         res.json(updatedCandidate);
@@ -78,9 +87,15 @@ router.patch('/candidates/:id', getCandidate, async (req, res) => {
 });
 
 // Delete a candidate
-router.delete('/candidates/:id', getCandidate, async (req, res) => {
+router.delete('/candidatesdelete/:id', async (req, res) => {
     try {
-        await res.candidate.remove();
+        console.log("_____", req.params)
+        const candidate = await Candidate.findById(req.params.id);
+        if (!candidate) {
+            return res.status(404).json({ message: 'Candidate not found' });
+        }
+        await candidate.delete()
+        // await res.candidate.remove();
         res.json({ message: 'Candidate deleted' });
     } catch (err) {
         res.status(500).json({ message: err.message });
@@ -89,6 +104,7 @@ router.delete('/candidates/:id', getCandidate, async (req, res) => {
 
 // Middleware function to get candidate by ID
 async function getCandidate(req, res, next) {
+    console.log("-----------------------");
     let candidate;
     try {
         candidate = await Candidate.findById(req.params.id);
